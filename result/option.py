@@ -1,4 +1,7 @@
+from ._traceback import  _generate_traceback
 from typing import TypeVar, Generic, TypeAlias, Protocol, NoReturn, Any
+import types
+
 SomeT = TypeVar("SomeT", covariant=True)
 
 class OptionProtocol(Protocol):
@@ -9,9 +12,6 @@ class OptionProtocol(Protocol):
         ...
 
     def unwrap_or(self, optb):
-        ...
-
-    def expect(self, error: str|Exception):
         ...
 
     is_some: bool
@@ -39,30 +39,27 @@ class Some(OptionProtocol, Generic[SomeT]):
     def unwrap_or(self, default: Any) -> SomeT:
         return self._value
 
-    def expect(self, error: str|Exception) -> SomeT:
-        return self._value
-
 
 class none(OptionProtocol):
+    __slots__ = ()
+    _traceback: types.TracebackType|None
     __slots__ = ()
 
     is_some = False
     is_none = True
 
+    def __init__(self):
+        self._traceback = _generate_traceback()
+
     def __repr__(self) -> str:
         return f"none"
 
     def unwrap(self) -> NoReturn:
-        raise RuntimeError(f"Unwrapped {self}")
+        raise RuntimeError(f"Unwrapped {self}").with_traceback(self._traceback)
 
     T = TypeVar("T")
     def unwrap_or(self, value: T) -> T:
         return value
 
-    def expect(self, error: str):
-        if isinstance(error, Exception):
-            raise error
-        else:
-            raise RuntimeError(f"{self}: {error}")
 
 Option: TypeAlias = Some[SomeT] | none

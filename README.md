@@ -20,6 +20,33 @@ match get_user():
     case Err(msg):
         print(f"Failed to get user: {msg}")
 ```
+### Tracebacks
+
+If you provide an exception into the Err, a traceback will be inserted.
+
+This allows you to have the powerful debugging of Exceptions with guarentees of results
+
+
+```python
+from result import Err
+
+def create_err() -> Err[str]:
+    return Err("Throw Me!")
+
+res = create_err()
+res.unwrap()
+```
+
+```
+Traceback (most recent call last):
+  File "/example.py", line 7, in <module>
+    res.unwrap()
+  File "/example.py", line 6, in <module>
+    res = create_err()
+  File "/example.py", line 4, in create_err
+    return Err("Throw Me!")
+RuntimeError: Unwrapped Err(Throw Me!)
+```
 
 ## Option
 

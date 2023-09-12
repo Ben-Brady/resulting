@@ -3,7 +3,7 @@
 Bring the rust Result and Option type into python.
 
 ```bash
-pip install result
+pip install resulting
 ```
 
 ## Result

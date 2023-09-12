@@ -1,35 +1,45 @@
+from . import UnwrapError
 from ._traceback import  _generate_traceback
-from ._shared import UnwrapError
-from typing import TypeVar, Generic, TypeAlias, Protocol, NoReturn, Any
+from typing import (
+    TypeVar, Generic, TypeAlias,
+    Protocol, NoReturn, Any,
+    Literal
+)
 import types
 
 SomeT = TypeVar("SomeT", covariant=True)
 
-class OptionProtocol(Protocol):
+class OptionProtocol(Protocol, Generic[SomeT]):
     def __repr__(self) -> str:
         ...
 
     def unwrap(self):
         ...
 
-    def unwrap_or(self, optb):
+    def expect(self, message: str) -> SomeT|NoReturn:
         ...
 
-    is_some: bool
-    is_none: bool
+    def unwrap_or(self, default: Any) -> SomeT:
+        ...
 
 
 class Some(OptionProtocol, Generic[SomeT]):
     __slots__ = ("_value",)
-    __match_args__ = ("_value",)
+    __match_args__ = ("_value","_traceback")
 
     _value: SomeT
+    _traceback: types.TracebackType|None
 
-    is_some = True
-    is_none = False
+    is_some: Literal[True] = True
+    is_none: Literal[False] = False
 
-    def __init__(self, value: SomeT):
+    def __init__(self, value: SomeT, *, with_traceback: bool = True):
         self._value = value
+
+        if with_traceback:
+            self._traceback = _generate_traceback()
+        else:
+            self._traceback = None
 
     def __repr__(self) -> str:
         return f"Ok({self._value})"
@@ -37,26 +47,34 @@ class Some(OptionProtocol, Generic[SomeT]):
     def unwrap(self) -> SomeT:
         return self._value
 
+    def expect(self, message: str) -> SomeT:
+        return self._value
+
     def unwrap_or(self, default: Any) -> SomeT:
         return self._value
 
 
 class none(OptionProtocol):
-    __slots__ = ()
+    __slots__ = ("_traceback",)
     _traceback: types.TracebackType|None
-    __slots__ = ()
 
-    is_some = False
-    is_none = True
+    is_some: Literal[False] = False
+    is_none: Literal[True] = True
 
-    def __init__(self):
-        self._traceback = _generate_traceback()
+    def __init__(self, *, with_traceback: bool = True):
+        if with_traceback:
+            self._traceback = _generate_traceback()
+        else:
+            self._traceback = None
 
     def __repr__(self) -> str:
         return f"none"
 
     def unwrap(self) -> NoReturn:
         raise UnwrapError(f"Unwrapped {self}").with_traceback(self._traceback)
+
+    def expect(self, message: str) -> NoReturn:
+        raise UnwrapError(message).with_traceback(self._traceback)
 
     T = TypeVar("T")
     def unwrap_or(self, value: T) -> T:

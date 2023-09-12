@@ -1,2 +1,0 @@
-class UnwrapError(Exception):
-    pass

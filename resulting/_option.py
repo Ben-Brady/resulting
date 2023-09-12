@@ -1,4 +1,5 @@
 from ._traceback import  _generate_traceback
+from ._shared import UnwrapError
 from typing import TypeVar, Generic, TypeAlias, Protocol, NoReturn, Any
 import types
 
@@ -55,7 +56,7 @@ class none(OptionProtocol):
         return f"none"
 
     def unwrap(self) -> NoReturn:
-        raise RuntimeError(f"Unwrapped {self}").with_traceback(self._traceback)
+        raise UnwrapError(f"Unwrapped {self}").with_traceback(self._traceback)
 
     T = TypeVar("T")
     def unwrap_or(self, value: T) -> T:

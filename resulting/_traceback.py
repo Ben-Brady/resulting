@@ -2,12 +2,12 @@ import types
 from pathlib import Path
 import traceback
 
+MODULE_FOLDER = str(Path(__file__).parent)
 def _generate_traceback() -> types.TracebackType|None:
     tb = None
     for (frame, line_no) in traceback.walk_stack(None):
-        MODULE_FOLDER = Path(__file__).parent
-        frame_folder = Path(frame.f_code.co_filename).parent
-        is_in_this_module = MODULE_FOLDER == frame_folder
+        stack_file = frame.f_code.co_filename
+        is_in_this_module = stack_file.startswith(MODULE_FOLDER)
         if is_in_this_module:
             continue
 

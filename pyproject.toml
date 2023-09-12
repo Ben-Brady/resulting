@@ -1,5 +1,5 @@
 [project]
-name = "result-ify"
+name = "resulting"
 version = "1.0.0"
 description = "Rust's Result and Option in python"
 license = {file = "LICENSE"}

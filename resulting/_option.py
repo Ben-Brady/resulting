@@ -1,34 +1,34 @@
 from . import UnwrapError
-from ._traceback import  _generate_traceback
-from typing import (
-    TypeVar, Generic, TypeAlias,
-    Protocol, NoReturn, Any,
-    Literal
-)
+from ._traceback import _generate_traceback
+from typing import TypeVar, Generic, TypeAlias, Protocol, NoReturn, Any, Literal
+from abc import ABC
 import types
 
 SomeT = TypeVar("SomeT", covariant=True)
 
-class OptionProtocol(Protocol, Generic[SomeT]):
-    def __repr__(self) -> str:
-        ...
 
-    def unwrap(self):
-        ...
+class OptionBase(ABC, Generic[SomeT]):
+    def __init__(self, value: SomeT | None):
+        if value is None:
+            return none()
+        else:
+            return Some(value)
 
-    def expect(self, message: str) -> SomeT|NoReturn:
-        ...
+    def __repr__(self) -> str: ...
 
-    def unwrap_or(self, default: Any) -> SomeT:
-        ...
+    def unwrap(self): ...
+
+    def expect(self, message: str) -> SomeT | NoReturn: ...
+
+    def unwrap_or(self, default: Any) -> SomeT: ...
 
 
-class Some(OptionProtocol, Generic[SomeT]):
+class Some(OptionBase, Generic[SomeT]):
     __slots__ = ("_value",)
-    __match_args__ = ("_value","_traceback")
+    __match_args__ = ("_value", "_traceback")
 
     _value: SomeT
-    _traceback: types.TracebackType|None
+    _traceback: types.TracebackType | None
 
     is_some: Literal[True] = True
     is_none: Literal[False] = False
@@ -54,9 +54,9 @@ class Some(OptionProtocol, Generic[SomeT]):
         return self._value
 
 
-class none(OptionProtocol):
+class none(OptionBase):
     __slots__ = ("_traceback",)
-    _traceback: types.TracebackType|None
+    _traceback: types.TracebackType | None
 
     is_some: Literal[False] = False
     is_none: Literal[True] = True
@@ -77,6 +77,7 @@ class none(OptionProtocol):
         raise UnwrapError(message).with_traceback(self._traceback)
 
     T = TypeVar("T")
+
     def unwrap_or(self, value: T) -> T:
         return value
 

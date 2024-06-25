@@ -3,7 +3,7 @@ class UnwrapError(Exception):
 
 from ._result import Result, Ok, Err
 from ._option import Option, Some, none
-from ._wrappers import catch, optional
+from ._wrappers import catch, optional, acatch, aoptional
 
 __all__ = [
     "Result",
@@ -14,4 +14,6 @@ __all__ = [
     "none",
     "catch",
     "optional",
+    "acatch",
+    "aoptional",
 ]

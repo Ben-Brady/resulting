@@ -67,10 +67,10 @@ match get_user():
 
 ## Catch Errors
 
-You can use the `safe` decorator to catch exceptions
+You can use the `catch` decorator to catch exceptions
 
 ```python
-from resulting import safe
+from resulting import catch
 
 @catch()
 def get_user() -> str:
@@ -92,6 +92,8 @@ res: Result[str, KeyError|LookupError] = get_user()
 ```
 
 ## Optional
+
+You can use the optional wrapper to wrap existing functions in an Option
 
 ```python
 from resulting import optional
